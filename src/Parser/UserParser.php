@@ -13,6 +13,7 @@ namespace Mineur\InstagramParser\Parser;
 
 use Mineur\InstagramParser\Exception\EmptyRequiredParamException;
 use Mineur\InstagramParser\Http\HttpClient;
+use Mineur\InstagramParser\Model\QueryHash;
 use Mineur\InstagramParser\Model\User;
 
 /**
@@ -27,23 +28,32 @@ class UserParser
     
     /** @var HttpClient */
     private $httpClient;
+	
+	/** @var string */
+	private $queryHash;
     
     /**
      * InstagramParser constructor.
      *
      * @param HttpClient $httpClient
+     * @param QueryHash $queryHash
      */
-    public function __construct(HttpClient $httpClient)
-    {
+    public function __construct(
+		HttpClient $httpClient,
+		QueryHash $queryHash
+    ) {
         $this->httpClient = $httpClient;
+	    $this->queryHash = $queryHash;
     }
-    
-    /**
-     * @param string $username
-     * @return User|mixed
-     * @internal param callable|null $callback
-     */
-    public function parse(string $username)
+	
+	/**
+	 * @param string $username
+	 *
+	 * @return User
+	 * @throws EmptyRequiredParamException
+	 * @internal param callable|null $callback
+	 */
+    public function parse(string $username): User
     {
         $this->ensureUsernameIsNotEmpty($username);
         
@@ -51,21 +61,28 @@ class UserParser
             self::ENDPOINT,
             $username
         );
-        $response = $this->makeRequest($endpoint);
+        $response = $this->makeRequest($endpoint, [
+			'query' => [
+				'query_hash' => $this->queryHash->__toString()
+			]
+        ]);
         $user     = $response['graphql']['user'];
 
         return User::fromArray($user);
     }
-    
-    /**
-     * @param string $endpoint
-     * @return array
-     */
-    private function makeRequest(string $endpoint): array
-    {
+	
+	/**
+	 * @param string $endpoint
+	 * @param array $options
+	 * @return array
+	 */
+    private function makeRequest(
+		string $endpoint,
+		array $options
+    ): array {
         $response = $this
             ->httpClient
-            ->get($endpoint, [])
+            ->get($endpoint, $options)
         ;
         
         return json_decode((string) $response, true);

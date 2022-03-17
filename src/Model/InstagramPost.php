@@ -64,7 +64,7 @@ class InstagramPost
      * InstagramPost constructor.
      *
      * @param int             $id
-     * @param string          $comment
+     * @param string|null     $comment
      * @param int             $commentsCount
      * @param TagCollection   $tags
      * @param string          $shortCode
@@ -117,7 +117,7 @@ class InstagramPost
      * @param array $instagramPost
      * @return InstagramPost
      */
-    public static function fromArray(array $instagramPost)
+    public static function fromArray(array $instagramPost): InstagramPost
     {
         return new self(
             (int) $instagramPost['id'],
@@ -131,7 +131,7 @@ class InstagramPost
             MediaDimensions::fromArray(
                 $instagramPost['dimensions']
             ),
-            (int) $instagramPost['edge_liked_by']['count'],
+            (int) $instagramPost['edge_media_preview_like']['count'],
             $instagramPost['display_url'],
             $instagramPost['thumbnail_src'],
             $instagramPost['owner']['id'],
@@ -235,8 +235,8 @@ class InstagramPost
         return $this->dimensions;
     }
     
-    /** @return string */
-    public function getLikesCount()
+    /** @return int */
+    public function getLikesCount(): int
     {
         return $this->likesCount;
     }
@@ -270,8 +270,10 @@ class InstagramPost
     {
         return $this->commentsDisabled;
     }
-    
-    /** @return bool|null */
+	
+	/**
+	 * @return string|null
+	 */
     public function getHashReference(): ? string
     {
         return $this->hashReference;

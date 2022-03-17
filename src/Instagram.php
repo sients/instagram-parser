@@ -59,10 +59,11 @@ class Instagram
      *
      * @return UserParser
      */
-    public static function createUserParser()
+    public static function createUserParser(string $queryHash)
     {
         return new UserParser(
-            new GuzzleHttpClient()
+            new GuzzleHttpClient(),
+	        new QueryHash($queryHash)
         );
     }
     
